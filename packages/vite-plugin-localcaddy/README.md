@@ -1,8 +1,8 @@
-# vite-plugin-domain (Deno Version)
+# vite-plugin-localcaddy
 
 > **Stop playing the localhost lottery.** Automatically assigns memorable, stable domains to your Vite projects using Caddy as a reverse proxy.
 
-This is a faithful reimplementation of the [Node.js version](https://www.npmjs.com/package/vite-plugin-domain), converted to TypeScript and built for the Deno runtime using Deno's standard library.
+This is a faithful reimplementation of [mustafa0x/vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain), converted to TypeScript and built for the Deno runtime using Deno's standard library.
 
 Transform this chaos:
 - `localhost:5173` → `frontend.local`
@@ -117,14 +117,15 @@ packages/vite-plugin-localcaddy/
 
 ## Resources
 
-- [Original Node.js version](https://www.npmjs.com/package/vite-plugin-domain) — The source implementation
+- [mustafa0x/vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain) — Original Node.js implementation
+- [npm package](https://www.npmjs.com/package/vite-plugin-domain) — Published package
 - [Caddy Documentation](https://caddyserver.com/docs/) — Reverse proxy and TLS setup
 - [Deno Standard Library](https://deno.land/std) — Standard library modules used
 
 ## Acknowledgement
 
-This code is based on the [original Node.js version](https://www.npmjs.com/package/vite-plugin-domain) found in the npm registry. Since no author name or contact information is provided in the original package metadata, credit is given by reference to the source package URL above.
+This package is a Deno conversion of [vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain) by [mustafa0x](https://github.com/mustafa0x). The original Node.js implementation provided the foundation for this fully-tested TypeScript port to the Deno runtime.
 
 ## License
 
-MIT (Same as the original Node.js version)
+MIT (Same as the original)
