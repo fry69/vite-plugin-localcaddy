@@ -24,7 +24,7 @@ Successfully converted the Node.js Vite plugin to a fully-typed Deno implementat
 
 ### Terminal Colors
 - **Node.js**: `import pc from 'picocolors'`
-- **Deno**: Native ANSI escape codes
+- **Deno**: `import { bold, cyan, dim } from "@std/fmt/colors"`
 
 ### HTTP Client
 - **Both**: Use native `fetch()` API (no changes needed)
@@ -143,7 +143,8 @@ The Deno implementation maintains **100% functional equivalence** with the Node.
 
 Only Deno standard library:
 - `@std/path` - Path manipulation
-- `@std/fs` - File system (not directly used, but included)
+- `@std/fs` - File system operations
+- `@std/fmt` - Terminal colors and formatting
 - `@std/assert` - Test assertions
 
 ## Usage
@@ -166,6 +167,7 @@ import domain from "jsr:@your-scope/vite-plugin-domain-deno";
 3. **Simpler imports** - JSR package resolution
 4. **Modern async/await** - No callback-based APIs
 5. **Explicit permissions** - Better security model
+6. **Standard library colors** - Uses @std/fmt/colors with automatic NO_COLOR support
 
 ## Testing Strategy
 
@@ -182,7 +184,7 @@ Tests were designed to:
 2. **Type definitions** - Created local Plugin type (Vite not in Deno)
 3. **File system** - Switched from sync Node.js APIs to Deno APIs
 4. **Process globals** - Replaced process.* with Deno.* equivalents
-5. **Colors** - Replaced picocolors with ANSI escape codes
+5. **Terminal colors** - Replaced picocolors with @std/fmt/colors from Deno standard library
 
 ## Next Steps
 

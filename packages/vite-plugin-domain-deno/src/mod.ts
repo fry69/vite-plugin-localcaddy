@@ -1,15 +1,9 @@
 import { basename, join } from "@std/path";
+import { bold, cyan, dim } from "@std/fmt/colors";
 
 // Vite Plugin type (defined locally since vite is not a Deno dependency)
 // deno-lint-ignore no-explicit-any
 type Plugin = any;
-
-// ANSI color codes for terminal output
-const colors = {
-  bold: (text: string) => `\x1b[1m${text}\x1b[22m`,
-  cyan: (text: string) => `\x1b[36m${text}\x1b[39m`,
-  dim: (text: string) => `\x1b[2m${text}\x1b[22m`,
-};
 
 type Options = {
   /** Caddy Admin API base URL */
@@ -498,7 +492,7 @@ export default function domain(user: Options = {}): Plugin {
         ? `https://${domain}:${httpsPort}`
         : `https://${domain}`;
     console.log(
-      `  ➜  ${colors.bold("Domain")}: ${colors.cyan(url)} ${colors.dim("(via caddy)")}`
+      `  ➜  ${bold("Domain")}: ${cyan(url)} ${dim("(via caddy)")}`
     );
   }
 

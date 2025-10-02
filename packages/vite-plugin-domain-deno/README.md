@@ -15,7 +15,8 @@ This is a faithful reimplementation of the [Node.js version](https://www.npmjs.c
 ## Differences from Node.js Version
 
 This Deno version:
-- Uses **Deno's standard library** (`@std/path`, `@std/fs`) instead of Node.js built-ins
+- Uses **Deno's standard library** (`@std/path`, `@std/fs`, `@std/fmt`) instead of Node.js built-ins
+- Uses **`@std/fmt/colors`** for terminal output instead of `picocolors`
 - Uses **Deno.connect()** for port checking instead of Node's `net` module
 - Uses **Deno.cwd()** and **Deno.readTextFileSync()** instead of `process` and `fs`
 - Has **TypeScript types built-in** (no separate `.d.ts` file needed)
@@ -197,7 +198,7 @@ When you start your Vite dev server:
 | `import net from 'node:net'` | `Deno.connect()` |
 | `process.cwd()` | `Deno.cwd()` |
 | `process.exitCode = 1` | `Deno.exit(1)` |
-| `picocolors` | ANSI escape codes |
+| `import pc from 'picocolors'` | `import { bold, cyan, dim } from "@std/fmt/colors"` |
 
 ## License
 
