@@ -1,3 +1,8 @@
+### v0.1.4
+
+- fix callout (deno fmt breaks this)
+- add proper scope to examples
+
 ### v0.1.3
 
 - update docs for trust installation

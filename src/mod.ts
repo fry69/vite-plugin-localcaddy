@@ -7,7 +7,7 @@
  * @example
  * ```ts
  * import { defineConfig } from "vite";
- * import localcaddy from "vite-plugin-localcaddy";
+ * import localcaddy from "@fry69/vite-plugin-localcaddy";
  *
  * export default defineConfig({
  *   plugins: [

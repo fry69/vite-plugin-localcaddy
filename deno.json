@@ -1,6 +1,6 @@
 {
   "name": "@fry69/vite-plugin-localcaddy",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "exports": "./src/mod.ts",
   "tasks": {
     "test": "deno test --allow-read --allow-write --allow-net",

@@ -16,7 +16,7 @@
 // }
 
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 // Simple configuration using defaults
 // Domain will be derived from folder name with .localhost TLD

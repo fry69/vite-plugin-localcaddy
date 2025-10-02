@@ -38,15 +38,18 @@ The plugin automatically:
 ### Install and Start Caddy
 
 1. [Install Caddy](https://caddyserver.com/docs/install) for your platform
-2. Trust Caddy's local CA (one-time setup):
-   ```bash
-   sudo caddy trust
-   ```
-3. Start Caddy with the admin API enabled:
+2. Start Caddy with the admin API enabled:
    ```bash
    caddy run
    ```
    The admin API runs on `http://127.0.0.1:2019` by default. The plugin uses this API to configure domains dynamically.
+3. Trust Caddy's local CA (one-time setup):
+   ```bash
+   sudo caddy trust
+   ```
+
+> [!NOTE]
+> **macOS users:** If you encounter certificate trust issues, you may need to install the `nss` package: `brew install nss`
 
 ## Installation
 
@@ -59,7 +62,7 @@ deno install jsr:@fry69/vite-plugin-localcaddy
 This adds the package to your `deno.json` imports, allowing you to use a clean import alias in your code:
 
 ```typescript
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 ```
 
 ## Basic Configuration
@@ -68,7 +71,7 @@ Add the plugin to your `vite.config.ts`:
 
 ```typescript
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [
@@ -288,7 +291,7 @@ If the plugin reports a port conflict:
 ```typescript
 // vite.config.ts
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain()],
@@ -302,7 +305,7 @@ Running in folder `my-app` → accessible at `https://my-app.localhost`
 ```typescript
 // vite.config.ts
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [
@@ -319,7 +322,7 @@ export default defineConfig({
 ```typescript
 // vite.config.ts
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [
@@ -340,7 +343,7 @@ Running in folder `my-app` → accessible at `https://my-app.local`
 ```typescript
 // frontend/vite.config.ts
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain({ domain: "frontend.localhost" })],
@@ -348,7 +351,7 @@ export default defineConfig({
 
 // api/vite.config.ts
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain({ domain: "api.localhost" })],
@@ -356,7 +359,7 @@ export default defineConfig({
 
 // admin/vite.config.ts
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain({ domain: "admin.localhost" })],

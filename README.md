@@ -25,12 +25,13 @@ caddy trust
 deno install jsr:@fry69/vite-plugin-localcaddy
 ```
 
-> [!NOTE] > **macOS users:** If you encounter certificate trust issues, you may need to install the `nss` package: `brew install nss`
+> [!NOTE]
+> **macOS users:** If you encounter certificate trust issues, you may need to install the `nss` package: `brew install nss`
 
 ```typescript
 // vite.config.ts
 import { defineConfig } from "vite";
-import domain from "vite-plugin-localcaddy";
+import domain from "@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain()],
@@ -84,8 +85,7 @@ For detailed conversion notes, see [CONVERSION_SUMMARY.md](./CONVERSION_SUMMARY.
 ### Running Tests
 
 ```bash
-cd packages/vite-plugin-localcaddy
-deno test --allow-read --allow-write --allow-net
+deno test -A
 ```
 
 All 25 tests validate:
@@ -95,20 +95,6 @@ All 25 tests validate:
 - Port checking and availability
 - Array comparison utilities
 - Plugin configuration and structure
-
-### Project Structure
-
-```
-/
-├── src/
-│   └── mod.ts              # Main plugin implementation (533 lines)
-├── tests/
-│   └── mod_test.ts         # Comprehensive test suite (25 tests)
-├── deno.json               # Deno configuration and dependencies
-├── README.md               # This file (conversion overview)
-├── USAGE.md                # Complete usage guide
-├── CONVERSION_SUMMARY.md   # Detailed conversion documentation
-└── vite.config.example.ts  # Example configuration
 
 ## Documentation
 
@@ -130,4 +116,3 @@ This package is a Deno conversion of [vite-plugin-domain](https://github.com/mus
 ## License
 
 MIT (Same as the original)
-```
