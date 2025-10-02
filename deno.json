@@ -1,0 +1,12 @@
+{
+  "workspace": ["packages/vite-plugin-domain-deno"],
+  "tasks": {},
+  "imports": {},
+  "exclude": ["packages/vite-plugin-domain-node"],
+  "lint": {
+    "exclude": ["packages/vite-plugin-domain-node"]
+  },
+  "fmt": {
+    "exclude": ["packages/vite-plugin-domain-node"]
+  }
+}
