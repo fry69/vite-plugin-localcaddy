@@ -1,3 +1,27 @@
+/**
+ * A Vite plugin that automatically configures Caddy reverse proxy routes for local HTTPS development.
+ *
+ * This plugin integrates with Caddy's admin API to dynamically create and manage
+ * reverse proxy routes, enabling local development with custom domains and HTTPS certificates.
+ *
+ * @example
+ * ```ts
+ * import { defineConfig } from "vite";
+ * import localcaddy from "vite-plugin-localcaddy";
+ *
+ * export default defineConfig({
+ *   plugins: [
+ *     localcaddy({
+ *       domain: "myapp.localhost",
+ *       verbose: true,
+ *     }),
+ *   ],
+ * });
+ * ```
+ *
+ * @module
+ */
+
 import { basename, join } from "@std/path";
 import { bold, cyan, dim } from "@std/fmt/colors";
 
@@ -5,63 +29,111 @@ import { bold, cyan, dim } from "@std/fmt/colors";
 // deno-lint-ignore no-explicit-any
 type Plugin = any;
 
+/**
+ * Configuration options for the vite-plugin-localcaddy plugin.
+ *
+ * @example
+ * ```ts
+ * const options: Options = {
+ *   domain: "myapp.localhost",
+ *   verbose: true,
+ *   failOnActiveDomain: false,
+ * };
+ * ```
+ */
 type Options = {
-  /** Caddy Admin API base URL */
+  /** Caddy Admin API base URL. Defaults to `http://127.0.0.1:2019`. */
   adminUrl?: string;
-  /** Caddy apps.http server id to use/create */
+  /** Caddy apps.http server id to use/create. Defaults to `vite-dev`. */
   serverId?: string;
-  /** Addresses for the dev server we manage in Caddy */
+  /** Addresses for the dev server we manage in Caddy. Defaults to `[":443", ":80"]`. */
   listen?: string[];
   /**
    * Choose the subdomain source (before the TLD) when no explicit `domain` is given:
-   *    - 'folder' (default): use current folder name
-   *    - 'pkg': use package.json "name"
+   *    - `'folder'` (default): use current folder name
+   *    - `'pkg'`: use package.json "name"
    */
   nameSource?: "folder" | "pkg";
-  /** Top-level domain (TLD) to use when building the domain (ignored if `domain` is set) */
+  /** Top-level domain (TLD) to use when building the domain (ignored if `domain` is set). Defaults to `local`. */
   tld?: string;
   /**
-   * Fully explicit domain to use (e.g., 'myapp.local' or 'myapp.localhost').
+   * Fully explicit domain to use (e.g., `'myapp.localhost'` or `'myapp.local'`).
    * If provided, overrides nameSource+tld.
    */
   domain?: string;
   /**
    * If an existing domain points to an active port that is NOT the current Vite port:
-   *    - true (default): fail fast & explain
-   *    - false: leave it alone and continue (no changes)
+   *    - `true` (default): fail fast & explain
+   *    - `false`: leave it alone and continue (no changes)
    */
   failOnActiveDomain?: boolean;
   /**
    * Insert the route at index 0 (before others) when creating a new one.
-   * Default: true
+   * Defaults to `true`.
    */
   insertFirst?: boolean;
-  /** Print logs. Default: false */
+  /** Print verbose logs to console. Defaults to `false`. */
   verbose?: boolean;
 };
 
+/**
+ * Internal options type with all required fields resolved to their defaults.
+ * Used internally after merging user options with defaults.
+ */
 type InternalOptions = {
+  /** Caddy Admin API base URL. */
   adminUrl: string;
+  /** Caddy apps.http server id to use/create. */
   serverId: string;
+  /** Addresses for the dev server we manage in Caddy. */
   listen: string[];
+  /** The subdomain source to use when building the domain. */
   nameSource: "folder" | "pkg";
+  /** Top-level domain (TLD) to use when building the domain. */
   tld: string;
+  /** Fully explicit domain to use, if provided. */
   domain: string | undefined;
+  /** Whether to fail when an existing domain points to an active port. */
   failOnActiveDomain: boolean;
+  /** Whether to insert new routes at index 0. */
   insertFirst: boolean;
+  /** Whether to print verbose logs. */
   verbose: boolean;
 };
 
+/**
+ * Represents a Caddy reverse proxy route configuration.
+ * This structure matches Caddy's HTTP route format.
+ */
 type CaddyRoute = {
+  /** Array of match conditions, typically containing host matchers. */
   match?: Array<{ host?: string[] }>;
+  /** Array of handlers, typically containing reverse_proxy configuration. */
   handle?: Array<{ handler: string; upstreams?: Array<{ dial: string }> }>;
+  /** Whether this route is terminal (stops processing subsequent routes). */
   terminal?: boolean;
 };
 
-// Export types for testing
+/**
+ * Exported types for testing and external usage.
+ */
 export type { CaddyRoute, Options };
 
-// Exported utility functions for testing
+/**
+ * Generates a URL-safe slug from the current folder name.
+ *
+ * Converts the folder name to lowercase and replaces non-alphanumeric
+ * characters with hyphens, removing leading/trailing hyphens.
+ *
+ * @param cwd The current working directory path. Defaults to `Deno.cwd()` if not specified.
+ * @returns A URL-safe slug derived from the folder name.
+ *
+ * @example
+ * ```ts
+ * slugFromFolder("/path/to/My App!") // "my-app"
+ * slugFromFolder("/path/to/foo_bar-123") // "foo-bar-123"
+ * ```
+ */
 export function slugFromFolder(cwd?: string): string {
   const dir = cwd ?? Deno.cwd();
   return basename(dir)
@@ -70,6 +142,25 @@ export function slugFromFolder(cwd?: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Generates a URL-safe slug from the package.json "name" field.
+ *
+ * Reads the package.json file and extracts the "name" field, converting it
+ * to a URL-safe slug. Falls back to {@link slugFromFolder} if the file
+ * cannot be read or doesn't contain a valid name.
+ *
+ * @param cwd The current working directory path. Defaults to `Deno.cwd()` if not specified.
+ * @returns A URL-safe slug derived from the package name.
+ *
+ * @example
+ * ```ts
+ * // If package.json contains: { "name": "@my/package-name" }
+ * slugFromPkg("/path/to/project") // "my-package-name"
+ *
+ * // If package.json is missing or invalid
+ * slugFromPkg("/path/to/my-folder") // "my-folder" (falls back to folder name)
+ * ```
+ */
 export function slugFromPkg(cwd?: string): string {
   const dir = cwd ?? Deno.cwd();
   try {
@@ -86,6 +177,26 @@ export function slugFromPkg(cwd?: string): string {
   }
 }
 
+/**
+ * Computes the final domain name based on the provided options.
+ *
+ * If an explicit domain is provided, it is returned as-is. Otherwise, the domain
+ * is constructed from a base name (either from the folder or package.json) and the TLD.
+ *
+ * @param options Configuration options for domain computation.
+ * @param options.domain Explicit domain name. If provided, this is returned directly.
+ * @param options.nameSource Source for the subdomain: `'folder'` or `'pkg'`. Defaults to `'folder'`.
+ * @param options.tld Top-level domain to append. Defaults to `'localhost'`.
+ * @param options.cwd Current working directory. Defaults to `Deno.cwd()`.
+ * @returns The computed domain name.
+ *
+ * @example
+ * ```ts
+ * computeDomain({ domain: "myapp.localhost" }) // "myapp.localhost"
+ * computeDomain({ nameSource: "folder", tld: "dev" }) // "my-project.dev"
+ * computeDomain({ nameSource: "pkg", tld: "localhost" }) // "my-package.localhost"
+ * ```
+ */
 export function computeDomain(options: {
   domain?: string;
   nameSource?: "folder" | "pkg";
@@ -94,12 +205,32 @@ export function computeDomain(options: {
 }): string {
   if (options.domain) return options.domain;
   const nameSource = options.nameSource ?? "folder";
-  const tld = options.tld ?? "local";
+  const tld = options.tld ?? "localhost";
   const cwd = options.cwd;
   const base = nameSource === "pkg" ? slugFromPkg(cwd) : slugFromFolder(cwd);
   return `${base}.${tld}`;
 }
 
+/**
+ * Searches for a Caddy route that matches the specified host.
+ *
+ * Iterates through the routes array and finds the first route with a host matcher
+ * that includes the specified hostname.
+ *
+ * @param routes Array of Caddy routes to search through.
+ * @param host The hostname to search for.
+ * @returns An object containing the matching route (or undefined) and its index (-1 if not found).
+ *
+ * @example
+ * ```ts
+ * const routes = [
+ *   { match: [{ host: ["example.localhost"] }], handle: [...] },
+ *   { match: [{ host: ["test.localhost"] }], handle: [...] },
+ * ];
+ * findRouteByHost(routes, "example.localhost") // { route: routes[0], index: 0 }
+ * findRouteByHost(routes, "missing.localhost") // { route: undefined, index: -1 }
+ * ```
+ */
 export function findRouteByHost(
   routes: CaddyRoute[] | undefined,
   host: string,
@@ -118,6 +249,25 @@ export function findRouteByHost(
   return { route: undefined, index: -1 };
 }
 
+/**
+ * Extracts the upstream port number from a Caddy route configuration.
+ *
+ * Searches through the route's handlers to find a reverse_proxy handler and
+ * extracts the port number from the first upstream's dial address.
+ *
+ * @param route The Caddy route to extract the port from.
+ * @returns The upstream port number, or undefined if not found.
+ *
+ * @example
+ * ```ts
+ * const route = {
+ *   handle: [
+ *     { handler: "reverse_proxy", upstreams: [{ dial: "127.0.0.1:5173" }] }
+ *   ]
+ * };
+ * extractUpstreamPort(route) // 5173
+ * ```
+ */
 export function extractUpstreamPort(route: CaddyRoute): number | undefined {
   const handlers = Array.isArray(route.handle) ? route.handle : [];
   for (const h of handlers) {
@@ -135,6 +285,22 @@ export function extractUpstreamPort(route: CaddyRoute): number | undefined {
   return undefined;
 }
 
+/**
+ * Selects the best HTTPS port from a list of listen addresses.
+ *
+ * Prefers port 443 if available, otherwise returns the first port that is not 80.
+ * This is used to determine which port to display in the HTTPS URL.
+ *
+ * @param listen Array of listen addresses (e.g., `[":443", ":80"]`).
+ * @returns The selected HTTPS port number, or undefined if no suitable port is found.
+ *
+ * @example
+ * ```ts
+ * pickHttpsPort([":443", ":80"]) // 443
+ * pickHttpsPort([":8443", ":80"]) // 8443
+ * pickHttpsPort([":80"]) // undefined
+ * ```
+ */
 export function pickHttpsPort(listen: string[]): number | undefined {
   const ports = listen
     .map((a) => {
@@ -148,6 +314,20 @@ export function pickHttpsPort(listen: string[]): number | undefined {
   return ports.find((p) => p !== 80);
 }
 
+/**
+ * Compares two arrays for equality by checking if all elements match in order.
+ *
+ * @param a The first array to compare.
+ * @param b The second array to compare.
+ * @returns `true` if the arrays have the same length and all elements are equal at each index, `false` otherwise.
+ *
+ * @example
+ * ```ts
+ * arraysEqual([1, 2, 3], [1, 2, 3]) // true
+ * arraysEqual([1, 2], [1, 2, 3]) // false
+ * arraysEqual(["a", "b"], ["b", "a"]) // false
+ * ```
+ */
 export function arraysEqual<T>(a: T[], b: T[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
@@ -156,6 +336,25 @@ export function arraysEqual<T>(a: T[], b: T[]): boolean {
   return true;
 }
 
+/**
+ * Checks if a TCP port is actively listening for connections.
+ *
+ * Attempts to establish a TCP connection to the specified host and port.
+ * Returns `true` if the connection succeeds (port is active), `false` otherwise.
+ *
+ * @param port The port number to check.
+ * @param host The hostname or IP address to check. Defaults to `127.0.0.1`.
+ * @param timeoutMs Maximum time to wait for the connection in milliseconds. Defaults to `350`.
+ * @returns A promise that resolves to `true` if the port is active, `false` otherwise.
+ *
+ * @example
+ * ```ts
+ * const active = await isPortActive(5173); // Check if port 5173 is listening
+ * if (active) {
+ *   console.log("Port is in use");
+ * }
+ * ```
+ */
 export function isPortActive(
   port: number,
   host = "127.0.0.1",
@@ -187,6 +386,14 @@ export function isPortActive(
   });
 }
 
+/**
+ * Creates a Vite plugin that automatically configures Caddy for local HTTPS development.
+ *
+ * See the module documentation for detailed usage information and examples.
+ *
+ * @param user Configuration options. See {@link Options} for all available settings.
+ * @returns A Vite plugin instance that configures Caddy during development.
+ */
 export default function domain(user: Options = {}): Plugin {
   const opt: InternalOptions = {
     adminUrl: user.adminUrl ?? "http://127.0.0.1:2019",
