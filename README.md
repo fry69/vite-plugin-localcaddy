@@ -5,6 +5,7 @@
 This is a faithful reimplementation of [mustafa0x/vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain), built for the Deno runtime using Deno's standard library.
 
 Transform this chaos:
+
 - `localhost:5173` → `frontend.localhost`
 - `localhost:5174` → `admin.localhost`
 - `localhost:5175` → `api.localhost`
@@ -30,8 +31,8 @@ import { defineConfig } from "vite";
 import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain()]
-})
+  plugins: [domain()],
+});
 ```
 
 ```bash
@@ -45,14 +46,14 @@ This conversion replaces Node.js-specific APIs with Deno equivalents while maint
 
 ### Key Technical Changes
 
-| Category | Node.js | Deno |
-|----------|---------|------|
-| **File System** | `import fs from 'node:fs'`<br/>`fs.readFileSync()` | `Deno.readTextFileSync()` |
+| Category            | Node.js                                                               | Deno                                                              |
+| ------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **File System**     | `import fs from 'node:fs'`<br/>`fs.readFileSync()`                    | `Deno.readTextFileSync()`                                         |
 | **Path Operations** | `import path from 'node:path'`<br/>`path.basename()`, `process.cwd()` | `import { basename } from "@std/path"`<br/>`basename(Deno.cwd())` |
-| **Network** | `import net from 'node:net'`<br/>`net.createConnection()` | `Deno.connect()` |
-| **Process** | `process.exitCode = 1` | `Deno.exit(1)` |
-| **Terminal Colors** | `import pc from 'picocolors'` | `import { bold, cyan, dim } from "@std/fmt/colors"` |
-| **Permissions** | Implicit Node.js permissions | Explicit Deno flags: `--allow-read`, `--allow-net` |
+| **Network**         | `import net from 'node:net'`<br/>`net.createConnection()`             | `Deno.connect()`                                                  |
+| **Process**         | `process.exitCode = 1`                                                | `Deno.exit(1)`                                                    |
+| **Terminal Colors** | `import pc from 'picocolors'`                                         | `import { bold, cyan, dim } from "@std/fmt/colors"`               |
+| **Permissions**     | Implicit Node.js permissions                                          | Explicit Deno flags: `--allow-read`, `--allow-net`                |
 
 ### Features Retained
 
@@ -87,6 +88,7 @@ deno test --allow-read --allow-write --allow-net
 ```
 
 All 25 tests validate:
+
 - Domain generation (folder and package.json sources)
 - Route management and conflict detection
 - Port checking and availability
@@ -127,3 +129,4 @@ This package is a Deno conversion of [vite-plugin-domain](https://github.com/mus
 ## License
 
 MIT (Same as the original)
+```

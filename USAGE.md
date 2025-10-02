@@ -7,6 +7,7 @@ Stop playing the localhost lottery. This plugin automatically assigns memorable 
 ## The Problem
 
 You're working on multiple Vite projects. Each one claims a random port. You have browser tabs open to:
+
 - `localhost:5173` — wait, is this the admin panel or the customer app?
 - `localhost:5174` — definitely the API... or was it the docs site?
 - `localhost:3000` — something's running here but you forgot what
@@ -16,6 +17,7 @@ Tomorrow when you restart everything, the ports shuffle around. The API that was
 ## The Solution
 
 This tiny plugin wires each project to a stable local domain via [Caddy](https://caddyserver.com). Now you have:
+
 - `frontend.local` — always your frontend, no matter the port
 - `admin.local` — always your admin panel
 - `api.local` — always your API
@@ -25,6 +27,7 @@ Start any project in any order. Restart them whenever. The domains stay the same
 ## What It Does
 
 The plugin automatically:
+
 - Configures a Caddy HTTP server with HTTPS via the internal issuer
 - Routes your domain to whatever port Vite picks
 - Generates domain names from your folder or package.json
@@ -71,18 +74,18 @@ export default defineConfig({
   plugins: [
     domain({
       // All options are optional with sensible defaults:
-      adminUrl: "http://127.0.0.1:2019",   // Caddy admin API endpoint
-      serverId: "vite-dev",                // Caddy server identifier
-      listen: [":443", ":80"],             // Ports Caddy should listen on
-      nameSource: "folder",                // Use folder name for domain ('folder' | 'pkg')
-      tld: "localhost",                    // Top-level domain suffix
+      adminUrl: "http://127.0.0.1:2019", // Caddy admin API endpoint
+      serverId: "vite-dev", // Caddy server identifier
+      listen: [":443", ":80"], // Ports Caddy should listen on
+      nameSource: "folder", // Use folder name for domain ('folder' | 'pkg')
+      tld: "localhost", // Top-level domain suffix
       // domain: "myapp.localhost",        // Explicit domain (overrides nameSource+tld)
-      failOnActiveDomain: true,            // Fail if domain already has an active route
-      insertFirst: true,                   // Insert new route at top of route list
-      verbose: false,                      // Enable detailed logging
-    })
-  ]
-})
+      failOnActiveDomain: true, // Fail if domain already has an active route
+      insertFirst: true, // Insert new route at top of route list
+      verbose: false, // Enable detailed logging
+    }),
+  ],
+});
 ```
 
 ## Running with Deno
@@ -124,12 +127,14 @@ All options are optional with sensible defaults:
 ### Automatic Naming
 
 By default, the plugin generates a domain based on:
+
 - **Folder name** (`nameSource: "folder"`) — Uses the current directory name
 - **Package name** (`nameSource: "pkg"`) — Uses the `name` field from `package.json`
 
 The generated domain follows the pattern: `{name}.{tld}`
 
 Examples:
+
 ```typescript
 // In folder "my-frontend" with nameSource: "folder"
 // → Domain: my-frontend.localhost
@@ -143,7 +148,7 @@ Examples:
 Override automatic naming by specifying an explicit domain:
 
 ```typescript
-domain({ domain: "my-custom-app.localhost" })
+domain({ domain: "my-custom-app.localhost" });
 ```
 
 ## Choosing a TLD: .localhost vs .local
@@ -153,12 +158,13 @@ domain({ domain: "my-custom-app.localhost" })
 Works without additional setup in most browsers:
 
 ```typescript
-domain({ tld: "localhost" })
+domain({ tld: "localhost" });
 ```
 
 Browsers automatically resolve `*.localhost` to `127.0.0.1` per [RFC 6761](https://datatracker.ietf.org/doc/html/rfc6761). This is the **preferred option** as `.localhost` is officially reserved for local development.
 
 **Benefits:**
+
 - No `/etc/hosts` entries needed
 - Works across all operating systems
 - Officially designated for loopback testing
@@ -168,13 +174,16 @@ Browsers automatically resolve `*.localhost` to `127.0.0.1` per [RFC 6761](https
 Shorter and cleaner URLs, but **not recommended** as `.local` is officially reserved for mDNS (Multicast DNS) by RFC 6762:
 
 ```typescript
-domain({ tld: "local" })
+domain({ tld: "local" });
 ```
 
 **Requirements if you choose this option:**
+
 1. Add to Vite's allowed hosts:
    ```typescript
-   server: { allowedHosts: [".local"] }
+   server: {
+     allowedHosts: [".local"];
+   }
    ```
 
 2. Add an entry to `/etc/hosts`:
@@ -192,13 +201,13 @@ Run several Vite projects simultaneously with different domains:
 
 ```typescript
 // Project A: vite.config.ts
-domain({ domain: "frontend.localhost" })
+domain({ domain: "frontend.localhost" });
 
 // Project B: vite.config.ts
-domain({ domain: "admin.localhost" })
+domain({ domain: "admin.localhost" });
 
 // Project C: vite.config.ts
-domain({ domain: "api.localhost" })
+domain({ domain: "api.localhost" });
 ```
 
 All three projects can run concurrently, each accessible via its own domain, all routing through the same Caddy instance.
@@ -210,9 +219,9 @@ If you need different Caddy server settings per project:
 ```typescript
 domain({
   serverId: "my-project-server",
-  listen: [":8443", ":8080"],  // Custom ports
-  adminUrl: "http://127.0.0.1:2019"
-})
+  listen: [":8443", ":8080"], // Custom ports
+  adminUrl: "http://127.0.0.1:2019",
+});
 ```
 
 ### Debugging
@@ -220,10 +229,11 @@ domain({
 Enable verbose logging to troubleshoot issues:
 
 ```typescript
-domain({ verbose: true })
+domain({ verbose: true });
 ```
 
 This will print detailed information about:
+
 - Domain resolution and conflicts
 - Caddy API calls and responses
 - Port detection and binding
@@ -242,8 +252,9 @@ When you start your Vite dev server:
 7. Prints the HTTPS URL where you can access your app
 
 Example output:
+
 ```
-  ➜  Domain: https://my-app.localhost/ (via caddy)
+➜  Domain: https://my-app.localhost/ (via caddy)
 ```
 
 ## Troubleshooting
@@ -275,11 +286,13 @@ Example output:
 ### Permission Errors with Deno
 
 The plugin requires specific permissions:
+
 - `--allow-read` — To read `package.json` and folder names
 - `--allow-net` — To communicate with Caddy's admin API and check ports
 - `--allow-write` — (Optional) Only if the plugin needs to write temporary files
 
 Make sure these are granted when running Vite:
+
 ```bash
 deno task dev --allow-read --allow-net --allow-write
 ```
@@ -287,6 +300,7 @@ deno task dev --allow-read --allow-net --allow-write
 ### Port Conflicts
 
 If the plugin reports a port conflict:
+
 1. Check what's running on the conflicting port: `lsof -i :PORT`
 2. Stop the conflicting service or configure Vite to use a different port
 3. The plugin will automatically detect and use Vite's chosen port
@@ -301,8 +315,8 @@ import { defineConfig } from "vite";
 import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain()]
-})
+  plugins: [domain()],
+});
 ```
 
 Running in folder `my-app` → accessible at `https://my-app.localhost`
@@ -318,10 +332,10 @@ export default defineConfig({
   plugins: [
     domain({
       domain: "frontend.localhost",
-      verbose: true
-    })
-  ]
-})
+      verbose: true,
+    }),
+  ],
+});
 ```
 
 ### Using .local TLD (Not Recommended)
@@ -334,11 +348,11 @@ import domain from "vite-plugin-localcaddy";
 export default defineConfig({
   plugins: [
     domain({
-      tld: "local"
-    })
+      tld: "local",
+    }),
   ],
-  server: { allowedHosts: [".local"] }
-})
+  server: { allowedHosts: [".local"] },
+});
 ```
 
 Running in folder `my-app` → accessible at `https://my-app.local`
@@ -353,24 +367,24 @@ import { defineConfig } from "vite";
 import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain({ domain: "frontend.localhost" })]
-})
+  plugins: [domain({ domain: "frontend.localhost" })],
+});
 
 // api/vite.config.ts
 import { defineConfig } from "vite";
 import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain({ domain: "api.localhost" })]
-})
+  plugins: [domain({ domain: "api.localhost" })],
+});
 
 // admin/vite.config.ts
 import { defineConfig } from "vite";
 import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain({ domain: "admin.localhost" })]
-})
+  plugins: [domain({ domain: "admin.localhost" })],
+});
 ```
 
 All three projects can run simultaneously, each on its own stable domain.

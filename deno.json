@@ -1,12 +1,27 @@
 {
-  "workspace": ["packages/vite-plugin-localcaddy"],
-  "tasks": {},
-  "imports": {},
-  "exclude": ["packages/vite-plugin-domain"],
+  "name": "@fry69/vite-plugin-localcaddy",
+  "version": "0.1.0",
+  "exports": "./src/mod.ts",
+  "tasks": {
+    "test": "deno test --allow-read --allow-write --allow-net"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1",
+    "@std/fmt": "jsr:@std/fmt@^1.0.8",
+    "@std/fs": "jsr:@std/fs@^1",
+    "@std/path": "jsr:@std/path@^1"
+  },
   "lint": {
-    "exclude": ["packages/vite-plugin-domain"]
+    "rules": {
+      "tags": ["recommended"]
+    }
   },
   "fmt": {
-    "exclude": ["packages/vite-plugin-domain"]
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": false,
+    "proseWrap": "preserve"
   }
 }
