@@ -23,5 +23,6 @@
     "semiColons": true,
     "singleQuote": false,
     "proseWrap": "preserve"
-  }
+  },
+  "exclude": ["vite.config.example.ts"]
 }

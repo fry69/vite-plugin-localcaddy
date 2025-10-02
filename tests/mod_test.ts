@@ -278,7 +278,7 @@ Deno.test("CaddyRoute - type structure validation", () => {
 Deno.test("plugin - returns correct plugin structure", () => {
   const plugin = domain({ verbose: true });
 
-  assertEquals(plugin.name, "vite-plugin-domain");
+  assertEquals(plugin.name, "vite-plugin-localcaddy");
   assertEquals(plugin.apply, "serve");
   assertExists(plugin.configureServer);
 });
@@ -287,7 +287,7 @@ Deno.test("plugin - applies default options", () => {
   // Test that plugin can be created with empty options
   const plugin = domain({});
 
-  assertEquals(plugin.name, "vite-plugin-domain");
+  assertEquals(plugin.name, "vite-plugin-localcaddy");
   assertExists(plugin.configureServer);
 });
 
@@ -306,6 +306,6 @@ Deno.test("plugin - accepts custom options", () => {
 
   const plugin = domain(options);
 
-  assertEquals(plugin.name, "vite-plugin-domain");
+  assertEquals(plugin.name, "vite-plugin-localcaddy");
   assertEquals(plugin.apply, "serve");
 });

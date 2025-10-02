@@ -201,14 +201,14 @@ export default function domain(user: Options = {}): Plugin {
   };
 
   const log = (...args: unknown[]) => {
-    if (opt.verbose) console.log("[vite-plugin-domain]", ...args);
+    if (opt.verbose) console.log("[vite-plugin-localcaddy]", ...args);
   };
 
   const warn = (...args: unknown[]) =>
-    console.warn("[vite-plugin-domain]", ...args);
+    console.warn("[vite-plugin-localcaddy]", ...args);
 
   const err = (...args: unknown[]) =>
-    console.error("[vite-plugin-domain]", ...args);
+    console.error("[vite-plugin-localcaddy]", ...args);
 
   // ---------- HTTP helpers ----------
   async function req(url: string, init?: RequestInit): Promise<unknown> {
@@ -545,7 +545,7 @@ export default function domain(user: Options = {}): Plugin {
   }
 
   return {
-    name: "vite-plugin-domain",
+    name: "vite-plugin-localcaddy",
     apply: "serve",
     // deno-lint-ignore no-explicit-any
     configureServer(server: any) {

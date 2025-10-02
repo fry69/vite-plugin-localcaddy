@@ -1,4 +1,4 @@
-# vite-plugin-domain Usage Guide
+# vite-plugin-localcaddy Usage Guide
 
 **Juggling multiple Vite apps and can't remember which port is which?**
 
