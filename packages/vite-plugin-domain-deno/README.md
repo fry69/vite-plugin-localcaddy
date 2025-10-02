@@ -214,3 +214,7 @@ MIT (Same as the original Node.js version)
 - [Original Node.js version](https://www.npmjs.com/package/vite-plugin-domain)
 - [Caddy Documentation](https://caddyserver.com/docs/)
 - [Deno Standard Library](https://deno.land/std)
+
+## Acknowledgement
+
+This code is based on the [original Node.js version](https://www.npmjs.com/package/vite-plugin-domain) found in the npm registry. Since no author name or contact information is provided in the original package metadata, credit is given by reference to the source package URL above.
