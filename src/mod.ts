@@ -54,7 +54,7 @@ type Options = {
    *    - `'pkg'`: use package.json "name"
    */
   nameSource?: "folder" | "pkg";
-  /** Top-level domain (TLD) to use when building the domain (ignored if `domain` is set). Defaults to `local`. */
+  /** Top-level domain (TLD) to use when building the domain (ignored if `domain` is set). Defaults to `localhost`. */
   tld?: string;
   /**
    * Fully explicit domain to use (e.g., `'myapp.localhost'` or `'myapp.local'`).
@@ -400,7 +400,7 @@ export default function domain(user: Options = {}): Plugin {
     serverId: user.serverId ?? "vite-dev",
     listen: user.listen ?? [":443", ":80"],
     nameSource: user.nameSource ?? "folder",
-    tld: user.tld ?? "local",
+    tld: user.tld ?? "localhost",
     domain: user.domain ?? undefined,
     failOnActiveDomain: user.failOnActiveDomain ?? true,
     insertFirst: user.insertFirst ?? true,

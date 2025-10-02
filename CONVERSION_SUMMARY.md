@@ -173,7 +173,7 @@ deno task test
 deno lint src/ tests/
 
 # Use in project
-import domain from "jsr:@your-scope/vite-plugin-localcaddy";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 ```
 
 ## Notable Improvements

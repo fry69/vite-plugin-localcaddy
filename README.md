@@ -98,7 +98,7 @@ All 25 tests validate:
 ### Project Structure
 
 ```
-packages/vite-plugin-localcaddy/
+/
 ├── src/
 │   └── mod.ts              # Main plugin implementation (533 lines)
 ├── tests/

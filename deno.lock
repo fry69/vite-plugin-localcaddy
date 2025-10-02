@@ -2,7 +2,7 @@
   "version": "5",
   "specifiers": {
     "jsr:@std/assert@1": "1.0.14",
-    "jsr:@std/fmt@^1.0.8": "1.0.8",
+    "jsr:@std/fmt@1": "1.0.8",
     "jsr:@std/internal@^1.0.10": "1.0.10",
     "jsr:@std/path@1": "1.1.2"
   },
@@ -29,7 +29,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@1",
-      "jsr:@std/fmt@^1.0.8",
+      "jsr:@std/fmt@1",
       "jsr:@std/fs@1",
       "jsr:@std/path@1"
     ]

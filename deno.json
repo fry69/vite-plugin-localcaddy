@@ -1,6 +1,6 @@
 {
   "name": "@fry69/vite-plugin-localcaddy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "exports": "./src/mod.ts",
   "tasks": {
     "test": "deno test --allow-read --allow-write --allow-net",
@@ -8,7 +8,7 @@
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1",
-    "@std/fmt": "jsr:@std/fmt@^1.0.8",
+    "@std/fmt": "jsr:@std/fmt@^1",
     "@std/fs": "jsr:@std/fs@^1",
     "@std/path": "jsr:@std/path@^1"
   },

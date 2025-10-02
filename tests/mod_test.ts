@@ -55,11 +55,19 @@ Deno.test("slugFromPkg - falls back to folder name on error", () => {
 });
 
 Deno.test("computeDomain - uses explicit domain when provided", () => {
-  const result = computeDomain({ domain: "explicit.local" });
-  assertEquals(result, "explicit.local");
+  const result = computeDomain({ domain: "explicit.localhost" });
+  assertEquals(result, "explicit.localhost");
 });
 
-Deno.test("computeDomain - combines slug with TLD", () => {
+Deno.test("computeDomain - defaults to .localhost TLD", () => {
+  const result = computeDomain({
+    nameSource: "folder",
+    cwd: "/path/to/my-app",
+  });
+  assertEquals(result, "my-app.localhost");
+});
+
+Deno.test("computeDomain - combines slug with custom TLD", () => {
   const result = computeDomain({
     nameSource: "folder",
     tld: "local",
@@ -72,10 +80,10 @@ Deno.test("computeDomain - uses package name when nameSource is pkg", () => {
   // This will fall back to folder name since no package.json exists
   const result = computeDomain({
     nameSource: "pkg",
-    tld: "local",
+    tld: "localhost",
     cwd: "/path/to/test-app",
   });
-  assertEquals(result, "test-app.local");
+  assertEquals(result, "test-app.localhost");
 });
 
 // ===== Route Extraction Tests =====
@@ -83,34 +91,36 @@ Deno.test("computeDomain - uses package name when nameSource is pkg", () => {
 Deno.test("findRouteByHost - finds route with matching host", () => {
   const routes: CaddyRoute[] = [
     {
-      match: [{ host: ["other.local"] }],
+      match: [{ host: ["other.localhost"] }],
       handle: [],
     },
     {
-      match: [{ host: ["target.local"] }],
-      handle: [{
-        handler: "reverse_proxy",
-        upstreams: [{ dial: "127.0.0.1:5173" }],
-      }],
+      match: [{ host: ["target.localhost"] }],
+      handle: [
+        {
+          handler: "reverse_proxy",
+          upstreams: [{ dial: "127.0.0.1:5173" }],
+        },
+      ],
     },
   ];
 
-  const { route, index } = findRouteByHost(routes, "target.local");
+  const { route, index } = findRouteByHost(routes, "target.localhost");
 
   assertEquals(index, 1);
   assertExists(route);
-  assertEquals(route.match?.[0].host?.[0], "target.local");
+  assertEquals(route.match?.[0].host?.[0], "target.localhost");
 });
 
 Deno.test("findRouteByHost - returns undefined when not found", () => {
   const routes: CaddyRoute[] = [
     {
-      match: [{ host: ["other.local"] }],
+      match: [{ host: ["other.localhost"] }],
       handle: [],
     },
   ];
 
-  const { route, index } = findRouteByHost(routes, "nonexistent.local");
+  const { route, index } = findRouteByHost(routes, "nonexistent.localhost");
 
   assertEquals(index, -1);
   assertEquals(route, undefined);
@@ -118,7 +128,7 @@ Deno.test("findRouteByHost - returns undefined when not found", () => {
 
 Deno.test("extractUpstreamPort - extracts port from route", () => {
   const route: CaddyRoute = {
-    match: [{ host: ["test.local"] }],
+    match: [{ host: ["test.localhost"] }],
     handle: [
       {
         handler: "reverse_proxy",
@@ -133,7 +143,7 @@ Deno.test("extractUpstreamPort - extracts port from route", () => {
 
 Deno.test("extractUpstreamPort - returns undefined when no port", () => {
   const route: CaddyRoute = {
-    match: [{ host: ["test.local"] }],
+    match: [{ host: ["test.localhost"] }],
     handle: [{ handler: "static_response" }],
   };
 
@@ -256,7 +266,7 @@ Deno.test("checkHostsForLocal - finds existing domain entry", () => {
 Deno.test("CaddyRoute - type structure validation", () => {
   // Test that CaddyRoute type allows proper route structure
   const route: CaddyRoute = {
-    match: [{ host: ["test.local"] }],
+    match: [{ host: ["test.localhost"] }],
     handle: [
       {
         handler: "reverse_proxy",
@@ -267,7 +277,7 @@ Deno.test("CaddyRoute - type structure validation", () => {
   };
 
   assertExists(route.match);
-  assertEquals(route.match[0].host?.[0], "test.local");
+  assertEquals(route.match[0].host?.[0], "test.localhost");
   assertEquals(route.handle?.[0].handler, "reverse_proxy");
   assertEquals(route.handle?.[0].upstreams?.[0].dial, "127.0.0.1:5173");
   assertEquals(route.terminal, true);
@@ -298,7 +308,7 @@ Deno.test("plugin - accepts custom options", () => {
     listen: [":8443"],
     nameSource: "pkg",
     tld: "localhost",
-    domain: "custom.local",
+    domain: "custom.localhost",
     failOnActiveDomain: false,
     insertFirst: false,
     verbose: true,

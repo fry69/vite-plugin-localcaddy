@@ -1,3 +1,10 @@
+### v0.1.2
+
+- documentation cleanup
+- relaxed version specifier for standard library
+- fix tests for preferring/defaultint to .localhost
+- fix missed .localhost default
+
 ### v0.1.1
 
 - add JSDoc comments
