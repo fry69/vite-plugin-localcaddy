@@ -58,6 +58,135 @@ type CaddyRoute = {
   terminal?: boolean;
 };
 
+// Export types for testing
+export type { CaddyRoute, Options };
+
+// Exported utility functions for testing
+export function slugFromFolder(cwd?: string): string {
+  const dir = cwd ?? Deno.cwd();
+  return basename(dir)
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function slugFromPkg(cwd?: string): string {
+  const dir = cwd ?? Deno.cwd();
+  try {
+    const pkg = JSON.parse(
+      Deno.readTextFileSync(join(dir, "package.json")),
+    );
+    const name = typeof pkg.name === "string" ? pkg.name : slugFromFolder(dir);
+    return String(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  } catch {
+    return slugFromFolder(dir);
+  }
+}
+
+export function computeDomain(options: {
+  domain?: string;
+  nameSource?: "folder" | "pkg";
+  tld?: string;
+  cwd?: string;
+}): string {
+  if (options.domain) return options.domain;
+  const nameSource = options.nameSource ?? "folder";
+  const tld = options.tld ?? "local";
+  const cwd = options.cwd;
+  const base = nameSource === "pkg" ? slugFromPkg(cwd) : slugFromFolder(cwd);
+  return `${base}.${tld}`;
+}
+
+export function findRouteByHost(
+  routes: CaddyRoute[] | undefined,
+  host: string,
+): { route: CaddyRoute | undefined; index: number } {
+  if (!routes) return { route: undefined, index: -1 };
+
+  for (let i = 0; i < routes.length; i++) {
+    const r = routes[i];
+    const matches = Array.isArray(r.match) ? r.match : [];
+    for (const m of matches) {
+      if (Array.isArray(m.host) && m.host.includes(host)) {
+        return { route: r, index: i };
+      }
+    }
+  }
+  return { route: undefined, index: -1 };
+}
+
+export function extractUpstreamPort(route: CaddyRoute): number | undefined {
+  const handlers = Array.isArray(route.handle) ? route.handle : [];
+  for (const h of handlers) {
+    if (h.handler === "reverse_proxy") {
+      const ups = h.upstreams;
+      if (Array.isArray(ups) && ups.length > 0) {
+        const dial = ups[0]?.dial;
+        if (dial) {
+          const m = /:(\d+)$/.exec(dial.trim());
+          if (m) return Number(m[1]);
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
+export function pickHttpsPort(listen: string[]): number | undefined {
+  const ports = listen
+    .map((a) => {
+      const m = /:(\d+)$/.exec(a);
+      return m ? Number(m[1]) : undefined;
+    })
+    .filter((n): n is number => typeof n === "number");
+
+  if (ports.includes(443)) return 443;
+  // prefer any port that's not 80
+  return ports.find((p) => p !== 80);
+}
+
+export function arraysEqual<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+export function isPortActive(
+  port: number,
+  host = "127.0.0.1",
+  timeoutMs = 350,
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const abort = new AbortController();
+    let resolved = false;
+
+    const done = (val: boolean) => {
+      if (resolved) return;
+      resolved = true;
+      abort.abort();
+      resolve(val);
+    };
+
+    const timer = setTimeout(() => done(false), timeoutMs);
+
+    Deno.connect({ hostname: host, port, signal: abort.signal })
+      .then((conn) => {
+        clearTimeout(timer);
+        conn.close();
+        done(true);
+      })
+      .catch(() => {
+        clearTimeout(timer);
+        done(false);
+      });
+  });
+}
+
 export default function domain(user: Options = {}): Plugin {
   const opt: InternalOptions = {
     adminUrl: user.adminUrl ?? "http://127.0.0.1:2019",
@@ -87,7 +216,7 @@ export default function domain(user: Options = {}): Plugin {
     const txt = await r.text();
     if (!r.ok) {
       throw new Error(
-        `HTTP ${r.status} ${r.statusText} for ${url}\n${txt}`
+        `HTTP ${r.status} ${r.statusText} for ${url}\n${txt}`,
       );
     }
     return txt ? JSON.parse(txt) : undefined;
@@ -119,39 +248,18 @@ export default function domain(user: Options = {}): Plugin {
     const r = await fetch(url, { method: "DELETE" });
     if (!r.ok) {
       throw new Error(
-        `HTTP ${r.status} ${r.statusText} for ${url}\n${await r.text()}`
+        `HTTP ${r.status} ${r.statusText} for ${url}\n${await r.text()}`,
       );
     }
   };
 
-  // ---------- Domain helpers ----------
-  function slugFromFolder(): string {
-    return basename(Deno.cwd())
-      .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  }
-
-  function slugFromPkg(): string {
-    try {
-      const pkg = JSON.parse(
-        Deno.readTextFileSync(join(Deno.cwd(), "package.json"))
-      );
-      const name = typeof pkg.name === "string" ? pkg.name : slugFromFolder();
-      return String(name)
-        .toLowerCase()
-        .replace(/[^a-z0-9-]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-    } catch {
-      return slugFromFolder();
-    }
-  }
-
-  function computeDomain(): string {
-    if (opt.domain) return opt.domain;
-    const base = opt.nameSource === "pkg" ? slugFromPkg() : slugFromFolder();
-    return `${base}.${opt.tld}`;
-  }
+  // Use exported utility functions
+  const _computeDomain = () =>
+    computeDomain({
+      domain: opt.domain,
+      nameSource: opt.nameSource,
+      tld: opt.tld,
+    });
 
   // ---------- Caddy bootstrap (HTTPS-first) ----------
   async function ensureCaddyServerExists(domain: string) {
@@ -181,13 +289,17 @@ export default function domain(user: Options = {}): Plugin {
         },
       });
       log(
-        `Initialized Caddy config; server '${opt.serverId}' on ${opt.listen.join(", ")}; TLS internal for ${domain}`
+        `Initialized Caddy config; server '${opt.serverId}' on ${
+          opt.listen.join(", ")
+        }; TLS internal for ${domain}`,
       );
       return;
     }
 
     // Ensure server exists (and listens on desired ports)
-    const serverBase = `${opt.adminUrl}/config/apps/http/servers/${encodeURIComponent(opt.serverId)}`;
+    const serverBase = `${opt.adminUrl}/config/apps/http/servers/${
+      encodeURIComponent(opt.serverId)
+    }`;
     const haveServer = await fetch(serverBase, { method: "GET" });
     if (!haveServer.ok) {
       // Create parents as needed, then server
@@ -252,20 +364,19 @@ export default function domain(user: Options = {}): Plugin {
     }
 
     // Check for an existing internal-policy that covers this exact domain
-    const policies =
-      ((await get(
-        `${opt.adminUrl}/config/apps/tls/automation/policies`
-      )) as Array<{
-        subjects?: string[];
-        issuers?: Array<{ module?: string }>;
-      }>) ?? [];
+    const policies = ((await get(
+      `${opt.adminUrl}/config/apps/tls/automation/policies`,
+    )) as Array<{
+      subjects?: string[];
+      issuers?: Array<{ module?: string }>;
+    }>) ?? [];
 
     const idx = policies.findIndex(
       (p) =>
         Array.isArray(p?.subjects) &&
         p.subjects.includes(domain) &&
         Array.isArray(p?.issuers) &&
-        p.issuers.some((i) => i?.module === "internal")
+        p.issuers.some((i) => i?.module === "internal"),
     );
 
     if (idx === -1) {
@@ -281,43 +392,10 @@ export default function domain(user: Options = {}): Plugin {
 
   async function getRoutes(): Promise<CaddyRoute[] | undefined> {
     return (await get(
-      `${opt.adminUrl}/config/apps/http/servers/${encodeURIComponent(opt.serverId)}/routes`
+      `${opt.adminUrl}/config/apps/http/servers/${
+        encodeURIComponent(opt.serverId)
+      }/routes`,
     )) as CaddyRoute[] | undefined;
-  }
-
-  function findRouteByHost(
-    routes: CaddyRoute[] | undefined,
-    host: string
-  ): { route: CaddyRoute | undefined; index: number } {
-    if (!routes) return { route: undefined, index: -1 };
-
-    for (let i = 0; i < routes.length; i++) {
-      const r = routes[i];
-      const matches = Array.isArray(r.match) ? r.match : [];
-      for (const m of matches) {
-        if (Array.isArray(m.host) && m.host.includes(host)) {
-          return { route: r, index: i };
-        }
-      }
-    }
-    return { route: undefined, index: -1 };
-  }
-
-  function extractUpstreamPort(route: CaddyRoute): number | undefined {
-    const handlers = Array.isArray(route.handle) ? route.handle : [];
-    for (const h of handlers) {
-      if (h.handler === "reverse_proxy") {
-        const ups = h.upstreams;
-        if (Array.isArray(ups) && ups.length > 0) {
-          const dial = ups[0]?.dial;
-          if (dial) {
-            const m = /:(\d+)$/.exec(dial.trim());
-            if (m) return Number(m[1]);
-          }
-        }
-      }
-    }
-    return undefined;
   }
 
   async function addRoute(domain: string, port: number) {
@@ -332,7 +410,9 @@ export default function domain(user: Options = {}): Plugin {
       terminal: true,
     };
 
-    const base = `${opt.adminUrl}/config/apps/http/servers/${encodeURIComponent(opt.serverId)}/routes`;
+    const base = `${opt.adminUrl}/config/apps/http/servers/${
+      encodeURIComponent(opt.serverId)
+    }/routes`;
     if (opt.insertFirst) {
       await put(`${base}/0`, route);
     } else {
@@ -341,7 +421,9 @@ export default function domain(user: Options = {}): Plugin {
   }
 
   async function replaceRouteAt(index: number, domain: string, port: number) {
-    const base = `${opt.adminUrl}/config/apps/http/servers/${encodeURIComponent(opt.serverId)}/routes/${index}`;
+    const base = `${opt.adminUrl}/config/apps/http/servers/${
+      encodeURIComponent(opt.serverId)
+    }/routes/${index}`;
     const updated: CaddyRoute = {
       match: [{ host: [domain] }],
       handle: [
@@ -353,38 +435,6 @@ export default function domain(user: Options = {}): Plugin {
       terminal: true,
     };
     await put(base, updated);
-  }
-
-  // ---------- Port liveness ----------
-  function isPortActive(
-    port: number,
-    host = "127.0.0.1",
-    timeoutMs = 350
-  ): Promise<boolean> {
-    return new Promise((resolve) => {
-      const abort = new AbortController();
-      let resolved = false;
-
-      const done = (val: boolean) => {
-        if (resolved) return;
-        resolved = true;
-        abort.abort();
-        resolve(val);
-      };
-
-      const timer = setTimeout(() => done(false), timeoutMs);
-
-      Deno.connect({ hostname: host, port, signal: abort.signal })
-        .then((conn) => {
-          clearTimeout(timer);
-          conn.close();
-          done(true);
-        })
-        .catch(() => {
-          clearTimeout(timer);
-          done(false);
-        });
-    });
   }
 
   // ---------- /etc/hosts check for .local ----------
@@ -404,13 +454,13 @@ export default function domain(user: Options = {}): Plugin {
       if (!present) {
         warn(
           `Missing /etc/hosts entry for ${domain}. Add it with:\n` +
-            `    sudo bash -c "echo '127.0.0.1 ${domain}' >> /etc/hosts"`
+            `    sudo bash -c "echo '127.0.0.1 ${domain}' >> /etc/hosts"`,
         );
       }
     } catch {
       warn(
         `Could not read /etc/hosts to verify ${domain}. If requests fail, add:\n` +
-          `    sudo bash -c "echo '127.0.0.1 ${domain}' >> /etc/hosts"`
+          `    sudo bash -c "echo '127.0.0.1 ${domain}' >> /etc/hosts"`,
       );
     }
   }
@@ -423,13 +473,12 @@ export default function domain(user: Options = {}): Plugin {
     close?: () => Promise<void>;
   }) {
     const addr = server.httpServer?.address?.();
-    const vitePort =
-      addr && typeof addr === "object" && "port" in addr
-        ? addr.port
-        : undefined;
+    const vitePort = addr && typeof addr === "object" && "port" in addr
+      ? addr.port
+      : undefined;
     if (!vitePort) throw new Error("Unable to determine Vite dev server port");
 
-    const domain = computeDomain();
+    const domain = _computeDomain();
 
     // HTTPS-first bootstrap (server + TLS policy)
     await ensureCaddyServerExists(domain);
@@ -487,34 +536,12 @@ export default function domain(user: Options = {}): Plugin {
 
   function printWhereToBrowse(domain: string) {
     const httpsPort = pickHttpsPort(opt.listen);
-    const url =
-      httpsPort && httpsPort !== 443
-        ? `https://${domain}:${httpsPort}`
-        : `https://${domain}`;
+    const url = httpsPort && httpsPort !== 443
+      ? `https://${domain}:${httpsPort}`
+      : `https://${domain}`;
     console.log(
-      `  ➜  ${bold("Domain")}: ${cyan(url)} ${dim("(via caddy)")}`
+      `  ➜  ${bold("Domain")}: ${cyan(url)} ${dim("(via caddy)")}`,
     );
-  }
-
-  function pickHttpsPort(listen: string[]): number | undefined {
-    const ports = listen
-      .map((a) => {
-        const m = /:(\d+)$/.exec(a);
-        return m ? Number(m[1]) : undefined;
-      })
-      .filter((n): n is number => typeof n === "number");
-
-    if (ports.includes(443)) return 443;
-    // prefer any port that's not 80
-    return ports.find((p) => p !== 80);
-  }
-
-  function arraysEqual<T>(a: T[], b: T[]): boolean {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) return false;
-    }
-    return true;
   }
 
   return {

@@ -21,7 +21,6 @@ export default defineConfig({
   server: {
     // Required for .local domains to work with Vite
     allowedHosts: [".local"],
-
     // Optional: You can specify a port, or let Vite choose
     // port: 5173,
   },

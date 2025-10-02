@@ -7,26 +7,32 @@ Successfully converted the Node.js Vite plugin to a fully-typed Deno implementat
 ## Key Conversions
 
 ### File System Operations
+
 - **Node.js**: `import fs from 'node:fs'` → `fs.readFileSync()`
 - **Deno**: `Deno.readTextFileSync()` with proper error handling
 
 ### Path Manipulation
+
 - **Node.js**: `import path from 'node:path'` → `path.basename()`, `path.join()`
 - **Deno**: `import { basename, join } from "@std/path"`
 
 ### Network Operations
+
 - **Node.js**: `import net from 'node:net'` → `net.createConnection()`
 - **Deno**: `Deno.connect()` with AbortController for timeout
 
 ### Process Operations
+
 - **Node.js**: `process.cwd()`, `process.exitCode = 1`
 - **Deno**: `Deno.cwd()`, `Deno.exit(1)`
 
 ### Terminal Colors
+
 - **Node.js**: `import pc from 'picocolors'`
 - **Deno**: `import { bold, cyan, dim } from "@std/fmt/colors"`
 
 ### HTTP Client
+
 - **Both**: Use native `fetch()` API (no changes needed)
 
 ## Project Structure
@@ -47,6 +53,7 @@ packages/vite-plugin-domain-deno/
 ✅ **23 tests, all passing**
 
 ### Test Categories:
+
 1. **Domain Generation** (5 tests)
    - Slug creation from folder names
    - Package.json parsing
@@ -81,26 +88,34 @@ packages/vite-plugin-domain-deno/
 ## Implementation Highlights
 
 ### Type Safety
+
 - Proper TypeScript types throughout
 - No `any` types except where necessary for Vite plugin interface
 - Explicit type annotations for clarity
 
 ### Error Handling
+
 - Try-catch blocks for file operations
 - Graceful fallbacks (e.g., slugFromPkg → slugFromFolder)
 - Detailed error messages
 
 ### Caddy API Integration
+
 - Bootstrap server configuration
 - TLS automation with internal issuer
 - Route management (add, replace, find)
 - Port reconciliation
 
 ### Port Checking
+
 Replaced Node.js `net.createConnection()` with Deno equivalent:
 
 ```typescript
-function isPortActive(port: number, host = "127.0.0.1", timeoutMs = 350): Promise<boolean> {
+function isPortActive(
+  port: number,
+  host = "127.0.0.1",
+  timeoutMs = 350,
+): Promise<boolean> {
   return new Promise((resolve) => {
     const abort = new AbortController();
     let resolved = false;
@@ -142,6 +157,7 @@ The Deno implementation maintains **100% functional equivalence** with the Node.
 ## Dependencies
 
 Only Deno standard library:
+
 - `@std/path` - Path manipulation
 - `@std/fs` - File system operations
 - `@std/fmt` - Terminal colors and formatting
@@ -172,6 +188,7 @@ import domain from "jsr:@your-scope/vite-plugin-domain-deno";
 ## Testing Strategy
 
 Tests were designed to:
+
 - ✅ Verify all utility functions in isolation
 - ✅ Test domain generation logic with edge cases
 - ✅ Mock HTTP interactions where appropriate
@@ -198,6 +215,7 @@ To publish this package:
 ## Conclusion
 
 ✅ **Conversion Complete**
+
 - All functionality preserved
 - Full test coverage
 - Proper TypeScript types

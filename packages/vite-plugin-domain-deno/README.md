@@ -15,6 +15,7 @@ This is a faithful reimplementation of the [Node.js version](https://www.npmjs.c
 ## Differences from Node.js Version
 
 This Deno version:
+
 - Uses **Deno's standard library** (`@std/path`, `@std/fs`, `@std/fmt`) instead of Node.js built-ins
 - Uses **`@std/fmt/colors`** for terminal output instead of `picocolors`
 - Uses **Deno.connect()** for port checking instead of Node's `net` module
@@ -25,6 +26,7 @@ This Deno version:
 ## Prerequisites
 
 ### Install and start Caddy
+
 1. [Install Caddy](https://caddyserver.com/docs/install) for your platform
 2. Trust Caddy's local CA (one-time setup):
    ```bash
@@ -62,15 +64,15 @@ export default defineConfig({
   plugins: [
     domain({
       // All options are optional with sensible defaults:
-      adminUrl: "http://127.0.0.1:2019",   // Caddy admin API endpoint
-      serverId: "vite-dev",                // Caddy server identifier
-      listen: [":443", ":80"],             // Ports Caddy should listen on
-      nameSource: "folder",                // Use folder name ('folder' | 'pkg')
-      tld: "local",                        // Top-level domain suffix
+      adminUrl: "http://127.0.0.1:2019", // Caddy admin API endpoint
+      serverId: "vite-dev", // Caddy server identifier
+      listen: [":443", ":80"], // Ports Caddy should listen on
+      nameSource: "folder", // Use folder name ('folder' | 'pkg')
+      tld: "local", // Top-level domain suffix
       // domain: "myapp.local",            // Explicit domain (overrides nameSource+tld)
-      failOnActiveDomain: true,            // Fail if domain has active route
-      insertFirst: true,                   // Insert new route at top
-      verbose: false,                      // Enable detailed logging
+      failOnActiveDomain: true, // Fail if domain has active route
+      insertFirst: true, // Insert new route at top
+      verbose: false, // Enable detailed logging
     }),
   ],
   server: {
@@ -102,23 +104,24 @@ Or configure permissions in `deno.json`:
 
 All options are optional with sensible defaults:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `adminUrl` | `string` | `"http://127.0.0.1:2019"` | Caddy Admin API endpoint |
-| `serverId` | `string` | `"vite-dev"` | Caddy server identifier |
-| `listen` | `string[]` | `[":443", ":80"]` | Ports for Caddy to listen on |
-| `nameSource` | `"folder" \| "pkg"` | `"folder"` | Source for domain name |
-| `tld` | `string` | `"local"` | Top-level domain |
-| `domain` | `string \| undefined` | `undefined` | Explicit domain (overrides auto-naming) |
-| `failOnActiveDomain` | `boolean` | `true` | Fail if domain has active route to different port |
-| `insertFirst` | `boolean` | `true` | Insert route at beginning of route list |
-| `verbose` | `boolean` | `false` | Enable detailed logging |
+| Option               | Type                  | Default                   | Description                                       |
+| -------------------- | --------------------- | ------------------------- | ------------------------------------------------- |
+| `adminUrl`           | `string`              | `"http://127.0.0.1:2019"` | Caddy Admin API endpoint                          |
+| `serverId`           | `string`              | `"vite-dev"`              | Caddy server identifier                           |
+| `listen`             | `string[]`            | `[":443", ":80"]`         | Ports for Caddy to listen on                      |
+| `nameSource`         | `"folder" \| "pkg"`   | `"folder"`                | Source for domain name                            |
+| `tld`                | `string`              | `"local"`                 | Top-level domain                                  |
+| `domain`             | `string \| undefined` | `undefined`               | Explicit domain (overrides auto-naming)           |
+| `failOnActiveDomain` | `boolean`             | `true`                    | Fail if domain has active route to different port |
+| `insertFirst`        | `boolean`             | `true`                    | Insert route at beginning of route list           |
+| `verbose`            | `boolean`             | `false`                   | Enable detailed logging                           |
 
 ## Domain Configuration
 
 ### Automatic Naming
 
 By default, the plugin generates a domain based on:
+
 - **Folder name** (`nameSource: "folder"`) - Uses the current directory name
 - **Package name** (`nameSource: "pkg"`) - Uses the `name` field from `package.json`
 
@@ -129,7 +132,7 @@ The generated domain follows the pattern: `{name}.{tld}`
 Override automatic naming by specifying an explicit domain:
 
 ```typescript
-domain({ domain: "my-custom-app.local" })
+domain({ domain: "my-custom-app.local" });
 ```
 
 ## TLD Options: .local vs .localhost
@@ -140,7 +143,9 @@ Shorter and cleaner, but requires one-time setup:
 
 1. Add to Vite's allowed hosts:
    ```typescript
-   server: { allowedHosts: [".local"] }
+   server: {
+     allowedHosts: [".local"];
+   }
    ```
 
 2. Add an entry to `/etc/hosts`:
@@ -153,7 +158,7 @@ Shorter and cleaner, but requires one-time setup:
 Works without additional setup in most browsers:
 
 ```typescript
-domain({ tld: "localhost" })
+domain({ tld: "localhost" });
 ```
 
 Browsers typically resolve `*.localhost` to `127.0.0.1` automatically.
@@ -191,14 +196,14 @@ When you start your Vite dev server:
 
 ## Key Deno Conversions
 
-| Node.js | Deno |
-|---------|------|
-| `import fs from 'node:fs'` | `Deno.readTextFileSync()` |
-| `import path from 'node:path'` | `import { basename, join } from "@std/path"` |
-| `import net from 'node:net'` | `Deno.connect()` |
-| `process.cwd()` | `Deno.cwd()` |
-| `process.exitCode = 1` | `Deno.exit(1)` |
-| `import pc from 'picocolors'` | `import { bold, cyan, dim } from "@std/fmt/colors"` |
+| Node.js                        | Deno                                                |
+| ------------------------------ | --------------------------------------------------- |
+| `import fs from 'node:fs'`     | `Deno.readTextFileSync()`                           |
+| `import path from 'node:path'` | `import { basename, join } from "@std/path"`        |
+| `import net from 'node:net'`   | `Deno.connect()`                                    |
+| `process.cwd()`                | `Deno.cwd()`                                        |
+| `process.exitCode = 1`         | `Deno.exit(1)`                                      |
+| `import pc from 'picocolors'`  | `import { bold, cyan, dim } from "@std/fmt/colors"` |
 
 ## License
 
