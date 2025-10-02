@@ -2,7 +2,7 @@
 
 > **Stop playing the localhost lottery.** Automatically assigns memorable, stable domains to your Vite projects using Caddy as a reverse proxy.
 
-This is a faithful reimplementation of [mustafa0x/vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain), converted to TypeScript and built for the Deno runtime using Deno's standard library.
+This is a faithful reimplementation of [mustafa0x/vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain), built for the Deno runtime using Deno's standard library.
 
 Transform this chaos:
 - `localhost:5173` → `frontend.local`
@@ -53,7 +53,6 @@ This conversion replaces Node.js-specific APIs with Deno equivalents while maint
 | **Network** | `import net from 'node:net'`<br/>`net.createConnection()` | `Deno.connect()` |
 | **Process** | `process.exitCode = 1` | `Deno.exit(1)` |
 | **Terminal Colors** | `import pc from 'picocolors'` | `import { bold, cyan, dim } from "@std/fmt/colors"` |
-| **Type Definitions** | Separate `.d.ts` file | Built-in TypeScript support |
 | **Permissions** | Implicit Node.js permissions | Explicit Deno flags: `--allow-read`, `--allow-net` |
 
 ### Features Retained
@@ -63,7 +62,7 @@ This conversion replaces Node.js-specific APIs with Deno equivalents while maint
 ✅ HTTPS via Caddy's internal issuer
 ✅ Port conflict detection and resolution
 ✅ Multiple projects sharing one Caddy instance
-✅ Full TypeScript support with type safety
+✅ Full type safety and IDE support
 
 ## Conversion Methodology
 
@@ -72,10 +71,10 @@ The conversion followed a rigorous test-driven approach:
 1. **Analysis** — Studied the original Node.js implementation to understand behavior
 2. **Test Extraction** — Identified and documented all test cases from the source code
 3. **Test Implementation** — Wrote comprehensive Deno tests (25 test cases covering all functionality)
-4. **Incremental Conversion** — Reimplemented each function in Deno TypeScript until all tests passed
+4. **Incremental Conversion** — Reimplemented each function for Deno until all tests passed
 5. **Validation** — Ensured 100% test coverage and functional equivalence
 
-**Result:** A maintainable, fully-tested Deno implementation with type safety and modern best practices.
+**Result:** A maintainable, fully-tested Deno implementation with modern best practices.
 
 For detailed conversion notes, see [CONVERSION_SUMMARY.md](./CONVERSION_SUMMARY.md).
 
@@ -124,7 +123,7 @@ packages/vite-plugin-localcaddy/
 
 ## Acknowledgement
 
-This package is a Deno conversion of [vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain) by [mustafa0x](https://github.com/mustafa0x). The original Node.js implementation provided the foundation for this fully-tested TypeScript port to the Deno runtime.
+This package is a Deno conversion of [vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain) by [mustafa0x](https://github.com/mustafa0x). The original Node.js implementation provided the foundation for this fully-tested Deno port.
 
 ## License
 
