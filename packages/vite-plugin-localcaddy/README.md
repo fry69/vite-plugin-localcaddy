@@ -5,9 +5,9 @@
 This is a faithful reimplementation of [mustafa0x/vite-plugin-domain](https://github.com/mustafa0x/vite-plugin-domain), built for the Deno runtime using Deno's standard library.
 
 Transform this chaos:
-- `localhost:5173` → `frontend.local`
-- `localhost:5174` → `admin.local`
-- `localhost:5175` → `api.local`
+- `localhost:5173` → `frontend.localhost`
+- `localhost:5174` → `admin.localhost`
+- `localhost:5175` → `api.localhost`
 
 **📚 For complete usage documentation, see [USAGE.md](./USAGE.md)**
 
@@ -21,17 +21,16 @@ caddy trust
 caddy run
 
 # Add to your project
-deno add jsr:@fry69/vite-plugin-localcaddy
+deno install jsr:@fry69/vite-plugin-localcaddy
 ```
 
 ```typescript
 // vite.config.ts
-import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
+import { defineConfig } from "vite";
+import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain()],
-  server: { allowedHosts: [".local"] }
+  plugins: [domain()]
 })
 ```
 

@@ -50,13 +50,13 @@ The plugin automatically:
 Add the package to your Deno project:
 
 ```bash
-deno add jsr:@fry69/vite-plugin-localcaddy
+deno install jsr:@fry69/vite-plugin-localcaddy
 ```
 
-Or import directly in your code:
+This adds the package to your `deno.json` imports, allowing you to use a clean import alias in your code:
 
 ```typescript
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
+import domain from "vite-plugin-localcaddy";
 ```
 
 ## Basic Configuration
@@ -64,8 +64,8 @@ import domain from "jsr:@fry69/vite-plugin-localcaddy";
 Add the plugin to your `vite.config.ts`:
 
 ```typescript
-import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
+import { defineConfig } from "vite";
+import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [
@@ -75,17 +75,13 @@ export default defineConfig({
       serverId: "vite-dev",                // Caddy server identifier
       listen: [":443", ":80"],             // Ports Caddy should listen on
       nameSource: "folder",                // Use folder name for domain ('folder' | 'pkg')
-      tld: "local",                        // Top-level domain suffix
-      // domain: "myapp.local",            // Explicit domain (overrides nameSource+tld)
+      tld: "localhost",                    // Top-level domain suffix
+      // domain: "myapp.localhost",        // Explicit domain (overrides nameSource+tld)
       failOnActiveDomain: true,            // Fail if domain already has an active route
       insertFirst: true,                   // Insert new route at top of route list
       verbose: false,                      // Enable detailed logging
     })
-  ],
-  server: {
-    // Required for .local domains:
-    allowedHosts: [".local"],
-  }
+  ]
 })
 ```
 
@@ -117,7 +113,7 @@ All options are optional with sensible defaults:
 | `serverId`           | `string`              | `"vite-dev"`              | Caddy server identifier                           |
 | `listen`             | `string[]`            | `[":443", ":80"]`         | Ports for Caddy to listen on                      |
 | `nameSource`         | `"folder" \| "pkg"`   | `"folder"`                | Source for domain name                            |
-| `tld`                | `string`              | `"local"`                 | Top-level domain                                  |
+| `tld`                | `string`              | `"localhost"`             | Top-level domain                                  |
 | `domain`             | `string \| undefined` | `undefined`               | Explicit domain (overrides auto-naming)           |
 | `failOnActiveDomain` | `boolean`             | `true`                    | Fail if domain has active route to different port |
 | `insertFirst`        | `boolean`             | `true`                    | Insert route at beginning of route list           |
@@ -136,10 +132,10 @@ The generated domain follows the pattern: `{name}.{tld}`
 Examples:
 ```typescript
 // In folder "my-frontend" with nameSource: "folder"
-// → Domain: my-frontend.local
+// → Domain: my-frontend.localhost
 
 // With package.json containing { "name": "awesome-app" } and nameSource: "pkg"
-// → Domain: awesome-app.local
+// → Domain: awesome-app.localhost
 ```
 
 ### Manual Naming
@@ -147,15 +143,35 @@ Examples:
 Override automatic naming by specifying an explicit domain:
 
 ```typescript
-domain({ domain: "my-custom-app.local" })
+domain({ domain: "my-custom-app.localhost" })
 ```
 
-## Choosing a TLD: .local vs .localhost
+## Choosing a TLD: .localhost vs .local
 
-### Using .local (Recommended)
+### Using .localhost (Recommended)
 
-Shorter and cleaner, but requires one-time setup:
+Works without additional setup in most browsers:
 
+```typescript
+domain({ tld: "localhost" })
+```
+
+Browsers automatically resolve `*.localhost` to `127.0.0.1` per [RFC 6761](https://datatracker.ietf.org/doc/html/rfc6761). This is the **preferred option** as `.localhost` is officially reserved for local development.
+
+**Benefits:**
+- No `/etc/hosts` entries needed
+- Works across all operating systems
+- Officially designated for loopback testing
+
+### Using .local (Alternative)
+
+Shorter and cleaner URLs, but **not recommended** as `.local` is officially reserved for mDNS (Multicast DNS) by RFC 6762:
+
+```typescript
+domain({ tld: "local" })
+```
+
+**Requirements if you choose this option:**
 1. Add to Vite's allowed hosts:
    ```typescript
    server: { allowedHosts: [".local"] }
@@ -166,20 +182,7 @@ Shorter and cleaner, but requires one-time setup:
    sudo bash -c "echo '127.0.0.1 myapp.local' >> /etc/hosts"
    ```
 
-   **Note:** Some networks use `.local` for mDNS. The explicit hosts entry ensures local resolution.
-
-### Using .localhost
-
-Works without additional setup in most browsers:
-
-```typescript
-domain({ tld: "localhost" })
-```
-
-Browsers typically resolve `*.localhost` to `127.0.0.1` automatically. If Vite blocks it, add to allowed hosts:
-```typescript
-server: { allowedHosts: [".localhost"] }
-```
+**Note:** Using `.local` may cause conflicts on networks that use mDNS (like macOS Bonjour). The `.localhost` TLD avoids these issues.
 
 ## Advanced Usage
 
@@ -189,13 +192,13 @@ Run several Vite projects simultaneously with different domains:
 
 ```typescript
 // Project A: vite.config.ts
-domain({ domain: "frontend.local" })
+domain({ domain: "frontend.localhost" })
 
 // Project B: vite.config.ts
-domain({ domain: "admin.local" })
+domain({ domain: "admin.localhost" })
 
 // Project C: vite.config.ts
-domain({ domain: "api.local" })
+domain({ domain: "api.localhost" })
 ```
 
 All three projects can run concurrently, each accessible via its own domain, all routing through the same Caddy instance.
@@ -240,8 +243,7 @@ When you start your Vite dev server:
 
 Example output:
 ```
-  ➜  Local:   https://my-app.local/
-  ➜  Network: use --host to expose
+  ➜  Domain: https://my-app.localhost/ (via caddy)
 ```
 
 ## Troubleshooting
@@ -249,8 +251,8 @@ Example output:
 ### Browser Shows "Connection Refused"
 
 - Ensure Caddy is running: `caddy run`
-- Check the domain resolves: `ping myapp.local`
-- Verify `/etc/hosts` entry exists for `.local` domains
+- Check the domain resolves: `ping myapp.localhost`
+- For `.local` domains, verify `/etc/hosts` entry exists
 - Check Caddy's logs for errors
 
 ### Certificate Warnings
@@ -267,8 +269,8 @@ Example output:
 
 ### Vite Shows "Invalid Host Header"
 
-- Add your TLD to Vite's allowed hosts: `server: { allowedHosts: [".local"] }`
-- This is required for domains that don't resolve to localhost automatically
+- Add your TLD to Vite's allowed hosts: `server: { allowedHosts: [".localhost"] }`
+- This is typically only needed for custom TLDs or `.local` domains
 
 ### Permission Errors with Deno
 
@@ -295,81 +297,79 @@ If the plugin reports a port conflict:
 
 ```typescript
 // vite.config.ts
-import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
+import { defineConfig } from "vite";
+import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain()],
-  server: { allowedHosts: [".local"] }
+  plugins: [domain()]
 })
 ```
 
-Running in folder `my-app` → accessible at `https://my-app.local`
+Running in folder `my-app` → accessible at `https://my-app.localhost`
 
 ### Custom Domain with Debugging
 
 ```typescript
 // vite.config.ts
-import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
+import { defineConfig } from "vite";
+import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [
     domain({
-      domain: "frontend.local",
+      domain: "frontend.localhost",
       verbose: true
+    })
+  ]
+})
+```
+
+### Using .local TLD (Not Recommended)
+
+```typescript
+// vite.config.ts
+import { defineConfig } from "vite";
+import domain from "vite-plugin-localcaddy";
+
+export default defineConfig({
+  plugins: [
+    domain({
+      tld: "local"
     })
   ],
   server: { allowedHosts: [".local"] }
 })
 ```
 
-### Using .localhost TLD
+Running in folder `my-app` → accessible at `https://my-app.local`
 
-```typescript
-// vite.config.ts
-import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
-
-export default defineConfig({
-  plugins: [
-    domain({
-      tld: "localhost"
-    })
-  ]
-})
-```
-
-Running in folder `my-app` → accessible at `https://my-app.localhost`
+**Note:** Remember to add the `/etc/hosts` entry for `.local` domains.
 
 ### Multiple Projects with Shared Caddy
 
 ```typescript
 // frontend/vite.config.ts
-import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
+import { defineConfig } from "vite";
+import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain({ domain: "frontend.local" })],
-  server: { allowedHosts: [".local"] }
+  plugins: [domain({ domain: "frontend.localhost" })]
 })
 
 // api/vite.config.ts
-import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
+import { defineConfig } from "vite";
+import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain({ domain: "api.local" })],
-  server: { allowedHosts: [".local"] }
+  plugins: [domain({ domain: "api.localhost" })]
 })
 
 // admin/vite.config.ts
-import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-localcaddy";
+import { defineConfig } from "vite";
+import domain from "vite-plugin-localcaddy";
 
 export default defineConfig({
-  plugins: [domain({ domain: "admin.local" })],
-  server: { allowedHosts: [".local"] }
+  plugins: [domain({ domain: "admin.localhost" })]
 })
 ```
 
@@ -377,12 +377,13 @@ All three projects can run simultaneously, each on its own stable domain.
 
 ## Best Practices
 
-1. **Use explicit domains for production-like setups** — This makes it clear which service is which
-2. **Enable verbose mode during initial setup** — Helps diagnose configuration issues
-3. **Add /etc/hosts entries for all your local domains** — Ensures reliable resolution
+1. **Use `.localhost` TLD** — Officially reserved for loopback testing, works everywhere without setup
+2. **Use explicit domains for production-like setups** — This makes it clear which service is which
+3. **Enable verbose mode during initial setup** — Helps diagnose configuration issues
 4. **Keep Caddy running in a dedicated terminal** — So you can see logs if issues arise
 5. **Use the same serverId across projects** — Allows them to share one Caddy server instance
 6. **Trust Caddy's CA immediately** — Avoids certificate warnings later
+7. **Use import aliases from deno.json** — Avoid explicit package specifiers in source code
 
 ## See Also
 
