@@ -15,15 +15,17 @@ Transform this chaos:
 ## Quick Start
 
 ```bash
-# Install Caddy and trust its CA (one-time setup)
-caddy trust
-
 # Start Caddy
 caddy run
+
+# Install Caddy and trust its CA (one-time setup)
+caddy trust
 
 # Add to your project
 deno install jsr:@fry69/vite-plugin-localcaddy
 ```
+
+> [!NOTE] > **macOS users:** If you encounter certificate trust issues, you may need to install the `nss` package: `brew install nss`
 
 ```typescript
 // vite.config.ts
@@ -36,8 +38,8 @@ export default defineConfig({
 ```
 
 ```bash
-# Run with permissions
-deno task dev --allow-read --allow-net
+# The development server runs with necessary permissions by default
+deno task dev
 ```
 
 ## What Makes This Deno Version Different?
@@ -53,7 +55,6 @@ This conversion replaces Node.js-specific APIs with Deno equivalents while maint
 | **Network**         | `import net from 'node:net'`<br/>`net.createConnection()`             | `Deno.connect()`                                                  |
 | **Process**         | `process.exitCode = 1`                                                | `Deno.exit(1)`                                                    |
 | **Terminal Colors** | `import pc from 'picocolors'`                                         | `import { bold, cyan, dim } from "@std/fmt/colors"`               |
-| **Permissions**     | Implicit Node.js permissions                                          | Explicit Deno flags: `--allow-read`, `--allow-net`                |
 
 ### Features Retained
 

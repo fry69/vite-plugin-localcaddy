@@ -182,8 +182,7 @@ import domain from "jsr:@fry69/vite-plugin-localcaddy";
 2. **Better error messages** - TypeScript compiler catches more issues
 3. **Simpler imports** - JSR package resolution
 4. **Modern async/await** - No callback-based APIs
-5. **Explicit permissions** - Better security model
-6. **Standard library colors** - Uses @std/fmt/colors with automatic NO_COLOR support
+5. **Standard library colors** - Uses @std/fmt/colors with automatic NO_COLOR support
 
 ## Testing Strategy
 

@@ -1,3 +1,8 @@
+### v0.1.3
+
+- update docs for trust installation
+- clarify permissions
+
 ### v0.1.2
 
 - documentation cleanup

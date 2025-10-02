@@ -90,20 +90,10 @@ export default defineConfig({
 
 ## Running with Deno
 
-Since the plugin interacts with Caddy and reads files, you'll need to grant Deno permissions:
+The development server runs with necessary permissions by default:
 
 ```bash
-deno task dev --allow-read --allow-net --allow-write
-```
-
-Or configure permissions in `deno.json`:
-
-```json
-{
-  "tasks": {
-    "dev": "deno run --allow-read --allow-net --allow-write vite"
-  }
-}
+deno task dev
 ```
 
 ## Configuration Options
@@ -282,20 +272,6 @@ Example output:
 
 - Add your TLD to Vite's allowed hosts: `server: { allowedHosts: [".localhost"] }`
 - This is typically only needed for custom TLDs or `.local` domains
-
-### Permission Errors with Deno
-
-The plugin requires specific permissions:
-
-- `--allow-read` — To read `package.json` and folder names
-- `--allow-net` — To communicate with Caddy's admin API and check ports
-- `--allow-write` — (Optional) Only if the plugin needs to write temporary files
-
-Make sure these are granted when running Vite:
-
-```bash
-deno task dev --allow-read --allow-net --allow-write
-```
 
 ### Port Conflicts
 
