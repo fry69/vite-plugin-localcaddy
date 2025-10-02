@@ -38,7 +38,7 @@ Successfully converted the Node.js Vite plugin to a fully-typed Deno implementat
 ## Project Structure
 
 ```
-packages/vite-plugin-domain-deno/
+packages/vite-plugin-localcaddy/
 ├── src/
 │   └── mod.ts              # Main implementation (530 lines)
 ├── tests/
@@ -173,7 +173,7 @@ deno task test
 deno lint src/ tests/
 
 # Use in project
-import domain from "jsr:@your-scope/vite-plugin-domain-deno";
+import domain from "jsr:@your-scope/vite-plugin-localcaddy";
 ```
 
 ## Notable Improvements

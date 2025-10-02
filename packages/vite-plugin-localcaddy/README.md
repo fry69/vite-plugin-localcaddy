@@ -21,13 +21,13 @@ caddy trust
 caddy run
 
 # Add to your project
-deno add jsr:@fry69/vite-plugin-domain-deno
+deno add jsr:@fry69/vite-plugin-localcaddy
 ```
 
 ```typescript
 // vite.config.ts
 import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain()],
@@ -84,7 +84,7 @@ For detailed conversion notes, see [CONVERSION_SUMMARY.md](./CONVERSION_SUMMARY.
 ### Running Tests
 
 ```bash
-cd packages/vite-plugin-domain-deno
+cd packages/vite-plugin-localcaddy
 deno test --allow-read --allow-write --allow-net
 ```
 
@@ -98,7 +98,7 @@ All 25 tests validate:
 ### Project Structure
 
 ```
-packages/vite-plugin-domain-deno/
+packages/vite-plugin-localcaddy/
 ├── src/
 │   └── mod.ts              # Main plugin implementation (533 lines)
 ├── tests/

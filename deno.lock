@@ -38,7 +38,7 @@
   },
   "workspace": {
     "members": {
-      "packages/vite-plugin-domain-deno": {
+      "packages/vite-plugin-localcaddy": {
         "dependencies": [
           "jsr:@std/assert@1",
           "jsr:@std/fmt@^1.0.8",

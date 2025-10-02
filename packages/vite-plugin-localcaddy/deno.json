@@ -1,5 +1,5 @@
 {
-  "name": "@fry69/vite-plugin-domain",
+  "name": "@fry69/vite-plugin-localcaddy",
   "version": "0.1.0",
   "exports": "./src/mod.ts",
   "tasks": {

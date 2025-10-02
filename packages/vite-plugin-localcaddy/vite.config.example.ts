@@ -7,7 +7,7 @@
 // Note: This example assumes you're using Vite via npm in a Deno project
 
 import { defineConfig } from "npm:vite@^5.0.0";
-import domain from "./src/mod.ts"; // Or: "jsr:@your-scope/vite-plugin-domain-deno"
+import domain from "./src/mod.ts"; // Or: "jsr:@your-scope/vite-plugin-localcaddy"
 
 export default defineConfig({
   plugins: [

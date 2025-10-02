@@ -1,12 +1,12 @@
 {
-  "workspace": ["packages/vite-plugin-domain-deno"],
+  "workspace": ["packages/vite-plugin-localcaddy"],
   "tasks": {},
   "imports": {},
-  "exclude": ["packages/vite-plugin-domain-node"],
+  "exclude": ["packages/vite-plugin-domain"],
   "lint": {
-    "exclude": ["packages/vite-plugin-domain-node"]
+    "exclude": ["packages/vite-plugin-domain"]
   },
   "fmt": {
-    "exclude": ["packages/vite-plugin-domain-node"]
+    "exclude": ["packages/vite-plugin-domain"]
   }
 }

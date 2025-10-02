@@ -50,13 +50,13 @@ The plugin automatically:
 Add the package to your Deno project:
 
 ```bash
-deno add jsr:@fry69/vite-plugin-domain-deno
+deno add jsr:@fry69/vite-plugin-localcaddy
 ```
 
 Or import directly in your code:
 
 ```typescript
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 ```
 
 ## Basic Configuration
@@ -65,7 +65,7 @@ Add the plugin to your `vite.config.ts`:
 
 ```typescript
 import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [
@@ -296,7 +296,7 @@ If the plugin reports a port conflict:
 ```typescript
 // vite.config.ts
 import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain()],
@@ -311,7 +311,7 @@ Running in folder `my-app` → accessible at `https://my-app.local`
 ```typescript
 // vite.config.ts
 import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [
@@ -329,7 +329,7 @@ export default defineConfig({
 ```typescript
 // vite.config.ts
 import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [
@@ -347,7 +347,7 @@ Running in folder `my-app` → accessible at `https://my-app.localhost`
 ```typescript
 // frontend/vite.config.ts
 import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain({ domain: "frontend.local" })],
@@ -356,7 +356,7 @@ export default defineConfig({
 
 // api/vite.config.ts
 import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain({ domain: "api.local" })],
@@ -365,7 +365,7 @@ export default defineConfig({
 
 // admin/vite.config.ts
 import { defineConfig } from "npm:vite";
-import domain from "jsr:@fry69/vite-plugin-domain-deno";
+import domain from "jsr:@fry69/vite-plugin-localcaddy";
 
 export default defineConfig({
   plugins: [domain({ domain: "admin.local" })],
