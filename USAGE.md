@@ -184,7 +184,8 @@ domain({ tld: "local" });
    sudo bash -c "echo '127.0.0.1 myapp.local' >> /etc/hosts"
    ```
 
-**Note:** Using `.local` may cause conflicts on networks that use mDNS (like macOS Bonjour). The `.localhost` TLD avoids these issues.
+> [!NOTE]
+> Using `.local` may cause conflicts on networks that use mDNS (like macOS Bonjour). The `.localhost` TLD avoids these issues.
 
 ## Advanced Usage
 

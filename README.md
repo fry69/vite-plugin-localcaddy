@@ -1,3 +1,6 @@
+[![JSR](https://jsr.io/badges/@fry69/vite-plugin-localcaddy)](https://jsr.io/@fry69/vite-plugin-localcaddy)
+[![JSR Score](https://jsr.io/badges/@fry69/vite-plugin-localcaddy/score)](https://jsr.io/@fry69/vite-plugin-localcaddy/score)
+
 # vite-plugin-localcaddy
 
 > **Stop playing the localhost lottery.** Automatically assigns memorable, stable domains to your Vite projects using Caddy as a reverse proxy.
@@ -59,24 +62,12 @@ This conversion replaces Node.js-specific APIs with Deno equivalents while maint
 
 ### Features Retained
 
-✅ All functionality from the Node.js version
-✅ Automatic domain generation from folder or package.json
-✅ HTTPS via Caddy's internal issuer
-✅ Port conflict detection and resolution
-✅ Multiple projects sharing one Caddy instance
-✅ Full type safety and IDE support
-
-## Conversion Methodology
-
-The conversion followed a rigorous test-driven approach:
-
-1. **Analysis** — Studied the original Node.js implementation to understand behavior
-2. **Test Extraction** — Identified and documented all test cases from the source code
-3. **Test Implementation** — Wrote comprehensive Deno tests (25 test cases covering all functionality)
-4. **Incremental Conversion** — Reimplemented each function for Deno until all tests passed
-5. **Validation** — Ensured 100% test coverage and functional equivalence
-
-**Result:** A maintainable, fully-tested Deno implementation with modern best practices.
+- All functionality from the Node.js version
+- Automatic domain generation from folder or package.json
+- HTTPS via Caddy's internal issuer
+- Port conflict detection and resolution
+- Multiple projects sharing one Caddy instance
+- Full type safety and IDE support
 
 For detailed conversion notes, see [CONVERSION_SUMMARY.md](./CONVERSION_SUMMARY.md).
 
@@ -88,7 +79,7 @@ For detailed conversion notes, see [CONVERSION_SUMMARY.md](./CONVERSION_SUMMARY.
 deno test -A
 ```
 
-All 25 tests validate:
+Tests validate:
 
 - Domain generation (folder and package.json sources)
 - Route management and conflict detection
