@@ -1,3 +1,12 @@
+### v0.1.5
+
+- update README.md
+- remove unused dependency
+- update USAGE.md
+- implementation cleanup
+- proper Vite plugin type import
+- add CI workflow
+
 ### v0.1.4
 
 - fix callout (deno fmt breaks this)

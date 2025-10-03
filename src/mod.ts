@@ -24,10 +24,7 @@
 
 import { basename, join } from "@std/path";
 import { bold, cyan, dim } from "@std/fmt/colors";
-
-// Vite Plugin type (defined locally since vite is not a Deno dependency)
-// deno-lint-ignore no-explicit-any
-type Plugin = any;
+import type { Plugin } from "vite";
 
 /**
  * Configuration options for the vite-plugin-localcaddy plugin.
@@ -79,27 +76,11 @@ type Options = {
 /**
  * Internal options type with all required fields resolved to their defaults.
  * Used internally after merging user options with defaults.
+ * Note: `domain` remains optional as it's computed from other options.
  */
-type InternalOptions = {
-  /** Caddy Admin API base URL. */
-  adminUrl: string;
-  /** Caddy apps.http server id to use/create. */
-  serverId: string;
-  /** Addresses for the dev server we manage in Caddy. */
-  listen: string[];
-  /** The subdomain source to use when building the domain. */
-  nameSource: "folder" | "pkg";
-  /** Top-level domain (TLD) to use when building the domain. */
-  tld: string;
-  /** Fully explicit domain to use, if provided. */
-  domain: string | undefined;
-  /** Whether to fail when an existing domain points to an active port. */
-  failOnActiveDomain: boolean;
-  /** Whether to insert new routes at index 0. */
-  insertFirst: boolean;
-  /** Whether to print verbose logs. */
-  verbose: boolean;
-};
+type InternalOptions =
+  & Required<Omit<Options, "domain">>
+  & Pick<Options, "domain">;
 
 /**
  * Represents a Caddy reverse proxy route configuration.
@@ -460,14 +441,6 @@ export default function domain(user: Options = {}): Plugin {
     }
   };
 
-  // Use exported utility functions
-  const _computeDomain = () =>
-    computeDomain({
-      domain: opt.domain,
-      nameSource: opt.nameSource,
-      tld: opt.tld,
-    });
-
   // ---------- Caddy bootstrap (HTTPS-first) ----------
   async function ensureCaddyServerExists(domain: string) {
     // If root config is null, seed both http+tls apps with internal issuer policy for this domain.
@@ -685,7 +658,11 @@ export default function domain(user: Options = {}): Plugin {
       : undefined;
     if (!vitePort) throw new Error("Unable to determine Vite dev server port");
 
-    const domain = _computeDomain();
+    const domain = computeDomain({
+      domain: opt.domain,
+      nameSource: opt.nameSource,
+      tld: opt.tld,
+    });
 
     // HTTPS-first bootstrap (server + TLS policy)
     await ensureCaddyServerExists(domain);
@@ -754,8 +731,7 @@ export default function domain(user: Options = {}): Plugin {
   return {
     name: "vite-plugin-localcaddy",
     apply: "serve",
-    // deno-lint-ignore no-explicit-any
-    configureServer(server: any) {
+    configureServer(server) {
       server.httpServer?.once("listening", () => {
         wireDomain(server).catch((e: Error) => {
           err("setup failed:", e.message || e);
