@@ -1,6 +1,6 @@
 {
   "name": "@fry69/vite-plugin-localcaddy",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "exports": "./src/mod.ts",
   "tasks": {
     "test": "deno test --allow-read --allow-write --allow-net",
@@ -25,6 +25,5 @@
     "singleQuote": false,
     "proseWrap": "preserve"
   },
-  "exclude": ["vite.config.example.ts"],
   "nodeModulesDir": "none"
 }

@@ -5,12 +5,12 @@
 // 2. Make sure Caddy is running: caddy run
 // 3. Trust Caddy's CA (one-time): sudo caddy trust
 //
-// Run with: deno task dev --allow-read --allow-net
+// Run with: deno task dev
 //
 // Note: Import aliases below require deno.json with imports configured:
 // {
 //   "imports": {
-//     "vite": "npm:vite@^5",
+//     "vite": "npm:vite@^7",
 //     "vite-plugin-localcaddy": "jsr:@fry69/vite-plugin-localcaddy@^0.1"
 //   }
 // }

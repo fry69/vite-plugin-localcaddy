@@ -1,3 +1,7 @@
+### v0.1.6
+
+- include Vite config example
+
 ### v0.1.5
 
 - update README.md
